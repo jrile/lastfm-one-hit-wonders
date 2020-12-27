@@ -18,12 +18,12 @@ headers = {
 	'user-agent': 'one-hit-wonder-finder'
 }
 payload = {
-	'api_key': args.api_key,
+    'api_key': args.api_key,
     'user': args.username,
     'period': args.timeframe,
     'limit': args.batch_size,
-	'method': 'user.gettoptracks',
-	'format': 'json'
+    'method': 'user.gettoptracks',
+    'format': 'json'
 }
 
 parsed = {} # key: artist name, val: list of tuple of song/playcounts
@@ -36,9 +36,6 @@ while cur_page < pages:
     payload["page"] = cur_page
     r = requests.get('http://ws.audioscrobbler.com/2.0/', headers=headers, params=payload)
     to_json = r.json()
-    if not pages_set:
-        pages = int(to_json["toptracks"]["@attr"]["totalPages"]) # our true # of pages that we need to paginate.
-        pages_set = True
     print("Last.fm returned HTTP Status Code", r.status_code, "on request #" + str(cur_page) + " / " + str(pages) + " total")
     if(r.status_code != 200):
         print("ERROR:", "code = " + str(r.json()["error"]), r.json()["message"])
@@ -53,7 +50,9 @@ while cur_page < pages:
             sys.exit()
         else:
             break
-    
+    if not pages_set:
+        pages = int(to_json["toptracks"]["@attr"]["totalPages"]) # our true # of pages that we need to paginate.
+        pages_set = True
     for top_trk in to_json["toptracks"]["track"]:
         artist = top_trk["artist"]["name"]
         trk = top_trk["name"]
