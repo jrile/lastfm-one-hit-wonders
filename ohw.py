@@ -44,8 +44,8 @@ while cur_page < pages:
                 print("Retry #", str(retry+1) + "/" + str(args.retry))
                 retry = retry + 1
                 continue
-        if args.stop_on_error or cur_page == 0:
-            if(cur_page == 0):
+        if args.stop_on_error or cur_page == 1:
+            if(cur_page == 1):
                 print("No results to parse.")
             sys.exit()
         else:
