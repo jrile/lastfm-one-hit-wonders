@@ -1,6 +1,6 @@
 # lastfm-one-hit-wonders
 
-A simple python script that gathers a last.fm profile's "one hit wonders" - a list of song/artists that the profile has only listened to one of their songs sorted by play count.
+A simple python script that gathers "one hit wonders" per a last.fm profile - songs that a user has not explored any other work from the same artist, sorted by play count descending.
 
 Usage:
 ```
