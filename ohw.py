@@ -30,17 +30,19 @@ parsed = {} # key: artist name, val: list of tuple of song/playcounts
 
 cur_page = 1
 pages = sys.maxsize # dummy till we know how many pages we need.
-
+pages_set = False
 retry = 0
 while cur_page < pages:
     payload["page"] = cur_page
     r = requests.get('http://ws.audioscrobbler.com/2.0/', headers=headers, params=payload)
     to_json = r.json()
-    pages = int(to_json["toptracks"]["@attr"]["totalPages"]) # our true # of pages that we need to paginate.
+    if not pages_set:
+        pages = int(to_json["toptracks"]["@attr"]["totalPages"]) # our true # of pages that we need to paginate.
+        pages_set = True
     print("Last.fm returned HTTP Status Code", r.status_code, "on request #" + str(cur_page) + " / " + str(pages) + " total")
     if(r.status_code != 200):
         print("ERROR:", "code = " + str(r.json()["error"]), r.json()["message"])
-        if args.retry is not None and args.retry != 0:
+        if args.retry is not None and args.retry > 0:
             if retry < args.retry:
                 print("Retry #", str(retry+1) + "/" + str(args.retry))
                 retry = retry + 1
