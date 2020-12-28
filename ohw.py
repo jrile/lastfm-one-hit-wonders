@@ -11,6 +11,7 @@ parser.add_argument("--batch-size", type=int, default=1000, metavar="size", help
 parser.add_argument("--timeframe", choices=['overall', '7day', '1month', '3month', '6month', '12month'], default='overall', help="The time period over which to retrieve top tracks for.")
 parser.add_argument("--retry", type=int, default=None, metavar="total_retries", help="How many times to retry if last.fm returns a non 200 OK response.")
 parser.add_argument("--limit", type=int, default=None, help="How many tracks to display.")
+parser.add_argument("--max-unique", type=int, default=1, help="Change this to allow 2 hit wonders, etc.")
 
 args = parser.parse_args()
 
@@ -36,7 +37,6 @@ while cur_page < pages:
     payload["page"] = cur_page
     r = requests.get('http://ws.audioscrobbler.com/2.0/', headers=headers, params=payload)
     to_json = r.json()
-    print("Last.fm returned HTTP Status Code", r.status_code, "on request #" + str(cur_page) + " / " + str(pages) + " total")
     if(r.status_code != 200):
         print("ERROR:", "code = " + str(r.json()["error"]), r.json()["message"])
         if args.retry is not None and args.retry > 0:
@@ -67,15 +67,17 @@ while cur_page < pages:
             parsed[artist] = [trk_cnt_tuple]
     cur_page = cur_page + 1
     retry = 0
+    print("Last.fm returned HTTP Status Code", r.status_code, "on request #" + str(cur_page-1) + " / " + str(pages) + " total")
     
 #print(parsed)
 
 tracks_shown = 0
-for top_trk in parsed:
-    list_of_tracks = parsed[top_trk]
+for artist in parsed:
+    list_of_tracks = parsed[artist]
     #print(top_trk, parsed[top_trk])
-    if(len(list_of_tracks) == 1):
-        print("#" + str(tracks_shown+1) + ": " + parsed[top_trk][0][1] + " play(s) - " + top_trk + " - " + parsed[top_trk][0][0])
-        tracks_shown = tracks_shown + 1
-        if args.limit is not None and tracks_shown == args.limit:
-            break
+    if(len(list_of_tracks) <= args.max_unique):
+        for track in list_of_tracks:
+            print("#" + str(tracks_shown+1) + ": " + track[1] + " play(s) - " + artist + " - " + track[0])
+            tracks_shown = tracks_shown + 1
+            if args.limit is not None and tracks_shown == args.limit:
+                break
